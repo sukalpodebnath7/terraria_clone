@@ -123,7 +123,6 @@ struct PhysicalEntity {
 	}
 
 
-	void resolveConstrains();
 	void checkCollisionOnce(GameMap& gameMap, vec &pos);
 	vec performCollisonOnOneAxis(GameMap& gameMap, vec pos, vec delta);
 

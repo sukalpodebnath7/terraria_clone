@@ -19,7 +19,7 @@ struct PlayerEntity : public PhysicalEntity {
 
 	int state = 0;
 	//int prevState = 0;
-	bool direction = 1;
+	bool direction = 1; // 1 -> Right and 0 -> left
 	void entityAnimation();
 	float playerWidth = 32; // pixels
 	float playerHeight = 64; // pixels

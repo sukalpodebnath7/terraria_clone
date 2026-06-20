@@ -335,6 +335,9 @@ bool updateGame() {
 				gameData.inventory[it->type].second++;
 				it = gameData.dropedItems.erase(it);
 			}
+			else {
+				++it;
+			}
 		}
 		else if (distSq > 25 * 25) { 
 			it = gameData.dropedItems.erase(it);
