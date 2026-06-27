@@ -50,6 +50,11 @@ AssetManager assetManager;
 bool showimgui = false;
 int selectedItemId = 0;
 bool handEmpty = true;
+float transition = 0.f;
+bool changing = false;
+
+
+
 
 bool initGame() {
 	gameData.camera.target = { 100,120 };
@@ -110,7 +115,7 @@ bool updateGame() {
 
 
 
-	//------------player movement updates---------------
+	//------------ player movement updates ---------------
 
 	bool downTouch = gameData.player.downTouch;
 	if (IsKeyDown(KEY_A)) {
@@ -249,12 +254,12 @@ bool updateGame() {
 	ClearBackground(WHITE);
 
 	//background loading 
-
+	
 	// After loading the texture
 	SetTextureWrap(assetManager.forestBg, TEXTURE_WRAP_REPEAT);
 	float parallaxFactor = 0.5f;
-	static float down = 18;
-	static float zoom = 4.5f; // > 1.0 = zoom out, < 1.0 = zoom in
+	static float down = -347.625;
+	static float zoom = 30.750f; // > 1.0 = zoom out, < 1.0 = zoom in
 
 	float bgW = GetScreenWidth() * zoom;
 	float bgH = GetScreenHeight() * zoom;
@@ -265,7 +270,8 @@ bool updateGame() {
 
 
 
-	//-----------Drawing the Background --------------
+	//----------- Drawing the Background --------------
+
 	gameData.bg = { 0,0,0,0 };
 	int val;
 	int count = setBg(gameData.bg, gameData.gameMap, startViewX, startViewY, endViewX, endViewY, val);
@@ -294,8 +300,8 @@ bool updateGame() {
 		}
 
 		gameData.prevBg = bgTex;
-
 	}
+
 
 	DrawTexturePro(
 		bgTex,
@@ -340,6 +346,11 @@ bool updateGame() {
 		}
 	}
 
+
+
+
+
+	
 	if (showimgui) {
 		Rectangle rect;
 		rect.x = gameData.selectionStart.x;
@@ -348,7 +359,7 @@ bool updateGame() {
 		rect.height = gameData.selectionEnd.y - gameData.selectionStart.y + 1;
 
 		DrawRectangleLinesEx(rect, 0.1, { 20,101,250,255 });
-	}
+	} 
 
 	DrawTexturePro(
 		assetManager.frame,
