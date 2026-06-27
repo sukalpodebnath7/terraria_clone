@@ -10,6 +10,9 @@ struct AssetManager {
 	Texture2D frame;
 	Texture2D player;
 	Texture2D zombie;
+	Texture2D desertBg;
+	Texture2D mountainBg;
+	Texture2D snowBg;
 
 	void loadAll();
 };

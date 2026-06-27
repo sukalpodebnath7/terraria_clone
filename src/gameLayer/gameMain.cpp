@@ -17,6 +17,7 @@
 #include <items.h>
 #include <utility>
 #include <string>
+#include <helper.h>
 using namespace std;
 
 
@@ -40,6 +41,8 @@ struct GameData {
 	Zombie zombie{ gameMap };
 	vector<Item> dropedItems;
 	map<int, pair<Item, int>> inventory;
+	vector<int> bg;
+	Texture2D prevBg;
 
 }gameData;
 
@@ -69,6 +72,9 @@ bool initGame() {
 	gameData.zombie.teleport({ 120.7f, 200.5f });
 	gameData.zombie.entityTex = assetManager.zombie;
 
+	gameData.bg.resize(4); // 0-> forest, 1 -> mountain, 2-> desert, 3 -> ice
+	gameData.bg = { 0,0,0,0 };
+	gameData.prevBg = assetManager.forestBg;
 
 	return true;
 }
@@ -190,8 +196,9 @@ bool updateGame() {
 	//std::cout << blockX << " " << blockY << std::endl;
 
 	if (!showimgui) {
+		Block blk = gameData.gameMap.getBlock(blockX, blockY);
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			int type = gameData.gameMap.getBlock(blockX, blockY).type;
+			int type = blk.type;
 			if (type != Block::air) {
 				Item item{ gameData.gameMap };
 				item.type = type;
@@ -202,7 +209,7 @@ bool updateGame() {
 			gameData.gameMap.getBlock(blockX, blockY).type = Block::air;
 		}
 		Transform2D block = { {blockX + 0.5, blockY + 0.5}, 1, 1 };
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !gameData.player.transform.intersectTransform(block) && gameData.gameMap.getBlock(blockX,blockY).type == Block::air && !handEmpty) {
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !gameData.player.transform.intersectTransform(block) && (gameData.gameMap.getBlock(blockX,blockY).type == Block::air || !blk.isCollidable() ) && !handEmpty ) {
 			gameData.gameMap.getBlock(blockX, blockY).type = gameData.selectedBlockType;
 			gameData.inventory[gameData.selectedBlockType].second--;
 			if (gameData.inventory[gameData.selectedBlockType].second == 0) {
@@ -255,8 +262,43 @@ bool updateGame() {
 	float bgX = gameData.camera.target.x * parallaxFactor - bgW * 0.5f;
 	float bgY = gameData.camera.target.y * parallaxFactor - bgH * 0.5f - down;
 
+
+
+
+	//-----------Drawing the Background --------------
+	gameData.bg = { 0,0,0,0 };
+	int val;
+	int count = setBg(gameData.bg, gameData.gameMap, startViewX, startViewY, endViewX, endViewY, val);
+	Texture2D bgTex;
+
+	if (val == 0) {
+		bgTex = gameData.prevBg;
+	}
+
+	else {
+		//0->forest, 1->mountain, 2->desert, 3->ice
+
+		switch (count) {
+		case 0:
+			bgTex = assetManager.forestBg;
+			break;
+		case 1:
+			bgTex = assetManager.mountainBg;
+			break;
+		case 2:
+			bgTex = assetManager.desertBg;
+			break;
+		case 3:
+			bgTex = assetManager.snowBg;
+			break;
+		}
+
+		gameData.prevBg = bgTex;
+
+	}
+
 	DrawTexturePro(
-		assetManager.forestBg,
+		bgTex,
 		{
 			bgX,
 			bgY,
@@ -454,10 +496,10 @@ bool updateGame() {
 	if (showimgui) {
 
 		ImGui::Begin("test");
-		ImGui::SliderFloat("up", &up, 0, 10);
+		ImGui::SliderFloat("up", &up, 0, 50);
 		ImGui::SliderFloat("jump", &jump, 10, 50);
-		ImGui::SliderFloat("up/down", &down, 10.f, 100.f);
-		ImGui::SliderFloat("zoom in/out", &zoom, 0, 5);
+		ImGui::SliderFloat("up/down", &down, -500.f, 500.f);
+		ImGui::SliderFloat("zoom in/out", &zoom, -30, 50);
 		if (ImGui::Button("Copy")) {
 			gameData.copyStructure.copyFromMap(gameData.gameMap, gameData.selectionStart, gameData.selectionEnd);
 		}

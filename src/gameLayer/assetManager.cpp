@@ -3,7 +3,10 @@
 
 void AssetManager::loadAll() {
 	textures = LoadTexture(RESOURCES_PATH "texturesWithBackgroundVersion.png");
-	forestBg = LoadTexture(RESOURCES_PATH "forestBG.png");
+	forestBg = LoadTexture(RESOURCES_PATH "forestBG2.png");
+	desertBg = LoadTexture(RESOURCES_PATH "desertBG2.png");
+	snowBg = LoadTexture(RESOURCES_PATH "snowBG2.png");
+	mountainBg = LoadTexture(RESOURCES_PATH "mountainBG2.png");
 	texturesbg = LoadTexture(RESOURCES_PATH "texturesWithBackgroundVersion.png");
 	frame = LoadTexture(RESOURCES_PATH "frame.png");
 	player = LoadTexture(RESOURCES_PATH "playerSprites.png");
