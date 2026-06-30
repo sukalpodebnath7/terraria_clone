@@ -38,3 +38,22 @@ void PlayerEntity::entityAnimation() {
 		WHITE
 	);
 }
+
+
+void PlayerEntity::updateHealth() {
+	if (takenDamage == 0.f) return;
+
+	for (int i = 0; i < 5; i++) {
+		if (health[i] - takenDamage >= 0.f) {
+			health[i] -= takenDamage;
+			takenDamage = 0.f;
+			break;
+		}
+
+		else if (health[i] != 0) {
+			takenDamage -= health[i];
+			health[i] = 0.f;
+		}
+	}
+	
+}

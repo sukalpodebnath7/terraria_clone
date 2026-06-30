@@ -9,16 +9,20 @@ int setBg(vector<int>& bg, GameMap& gameMap, int sX, int sY, int eX, int eY, int
 				int type = gameMap.getBlock(x, y).type;
 
 				switch(type){
-				case Block::grassBlock :
+				case Block::grassBlock:
+				case Block::dirt:
+				case Block::grass:
 					bg[0]++;
 					break;
 				case Block::stone:
 					bg[1]++;
 					break;
 				case Block::sand:
+				case Block::sandStone:
 					bg[2]++;
 					break;
 				case Block::snow:
+				case Block::ice:
 					bg[3]++;
 					break;
 				default:

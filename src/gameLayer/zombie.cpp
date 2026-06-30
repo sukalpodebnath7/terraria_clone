@@ -2,20 +2,23 @@
 
 
 void Zombie::entityBehaviour(Transform2D& playerTransform) {
-	static int frameCount = 0;
 	frameCount++;
-	if (frameCount >= 64) {
-		playerDetected = playerDetectionCheck(playerTransform);
-	}
+	playerDetected = playerDetectionCheck(playerTransform);
 	bool shouldAttack = playerTransform.intersectTransform(transform) || playerTransform.intersectPoint(transform.pos);
 	
 	if (playerDetected) {
 		if (shouldAttack) {
 			state = Entity::attacking;
 			velocity.x = 0;
+			if (frameCount >= 100) {
+				player.takenDamage += attackDamage;
+				frameCount = 0;
+			}
 		}
-		else
+		else {
 			state = Entity::moving;
+			frameCount = 0;
+		}
 	}
 	else {
 		state = Entity::standing;

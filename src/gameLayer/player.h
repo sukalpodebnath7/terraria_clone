@@ -24,4 +24,9 @@ struct PlayerEntity : public PhysicalEntity {
 	float playerWidth = 32; // pixels
 	float playerHeight = 64; // pixels
 	int selectedBlock = 0;
+	float health[5] = { 20.f, 20.f, 20.f, 20.f, 20.f };
+	float lastDownTouch;
+	float takenDamage = 0.f;
+
+	void updateHealth();
 };

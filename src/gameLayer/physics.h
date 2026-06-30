@@ -89,6 +89,7 @@ struct PhysicalEntity {
 	bool rightTouch = 0;
 	bool upTouch = 0;
 	bool downTouch = 0;
+	
 
 
 	void teleport(vec pos) {

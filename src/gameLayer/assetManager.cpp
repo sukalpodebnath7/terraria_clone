@@ -11,4 +11,7 @@ void AssetManager::loadAll() {
 	frame = LoadTexture(RESOURCES_PATH "frame.png");
 	player = LoadTexture(RESOURCES_PATH "playerSprites.png");
 	zombie = LoadTexture(RESOURCES_PATH "zombie.png");
+	caveBg = LoadTexture(RESOURCES_PATH "caveBg2.png");
+	hearts = LoadTexture(RESOURCES_PATH "hearts.png");
+	recipeBook = LoadTexture(RESOURCES_PATH "recipeBook.png");
 }

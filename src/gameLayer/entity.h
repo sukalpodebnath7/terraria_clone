@@ -3,12 +3,13 @@
 #include <physics.h>
 #include <gameMap.h>
 #include <iostream>
+#include <player.h>
 using namespace std;
 
 struct Entity : public PhysicalEntity {
 	
-	Entity(GameMap& gm)
-		: gameMap(gm)
+	Entity(GameMap& gm, PlayerEntity& pl)
+		: gameMap(gm), player(pl)
 	{
 	}
 
@@ -84,5 +85,8 @@ struct Entity : public PhysicalEntity {
 
 	float entityWidth; // pixels
 	float entityHeight; // pixels
+	float attackDamage;
 	GameMap& gameMap;
+	PlayerEntity& player;
+	int frameCount = 0;
 };

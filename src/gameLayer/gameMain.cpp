@@ -38,11 +38,12 @@ struct GameData {
 	char saveName[100] = {};
 
 	PlayerEntity player;
-	Zombie zombie{ gameMap };
+	Zombie zombie{ gameMap , player};
 	vector<Item> dropedItems;
 	map<int, pair<Item, int>> inventory;
 	vector<int> bg;
 	Texture2D prevBg;
+
 
 }gameData;
 
@@ -52,7 +53,7 @@ int selectedItemId = 0;
 bool handEmpty = true;
 float transition = 0.f;
 bool changing = false;
-
+bool showRecipe = false;
 
 
 
@@ -70,6 +71,7 @@ bool initGame() {
 	gameData.player.transform = { {100.5f,200.5f}, 0.8f, 1.8f };
 	gameData.player.playerTex = assetManager.player;
 	gameData.player.selectedBlock = 1;
+	gameData.player.lastDownTouch = gameData.player.transform.pos.y;
 
 	gameData.zombie.transform = { {105.5f,150.5f}, 0.8f, 1.8f };
 	gameData.zombie.entityTex = assetManager.zombie;
@@ -160,6 +162,26 @@ bool updateGame() {
 	}
 
 	//-----------------------------------------------------------------------------------------
+
+
+
+	//--------------Player Health Update ------------------------
+
+	if (gameData.player.downTouch == 1) {
+		float delta =  -gameData.player.lastDownTouch + gameData.player.transform.pos.y;
+		if(delta >= 5.f)
+			gameData.player.takenDamage = (delta / 5) * 7;
+
+		gameData.player.lastDownTouch = gameData.player.transform.pos.y;
+		//if(delta != 0.f) std::cout << delta << std::endl;
+	}
+
+	gameData.player.updateHealth();
+	//std::cout << gameData.player.health[0] << std::endl;
+
+
+
+
 
 
 
@@ -301,6 +323,7 @@ bool updateGame() {
 
 		gameData.prevBg = bgTex;
 	}
+
 
 
 	DrawTexturePro(
@@ -455,6 +478,25 @@ bool updateGame() {
 
 	EndMode2D();
 
+	
+	if (IsKeyPressed(KEY_C)) showRecipe = !showRecipe;
+
+	if (showRecipe) {
+		DrawTexturePro(
+			assetManager.recipeBook,
+			{ 0.f,0.f, (float)assetManager.recipeBook.width, (float)assetManager.recipeBook.height },
+			{ 10.f, 10.f, GetScreenWidth() - 20.f, GetScreenHeight() - 20.f },
+			{ 0.f,0.f },
+			0.f,
+			WHITE
+		);
+	}
+
+
+
+
+
+
 
 	//inventoryDrawing:
 	float inventoryWidth = 0.40f*GetScreenWidth()/10.f;
@@ -499,8 +541,32 @@ bool updateGame() {
 	DrawRectangleLinesEx(
 		{ 0.30f * GetScreenWidth() + (gameData.player.selectedBlock-1) * inventoryWidth , GetScreenHeight() - inventoryHeight , inventoryHeight , inventoryWidth },
 		5,
-		BLACK
+		WHITE
 	);
+
+
+	//---------- Heart Drawing ---------------
+
+	float heartWidth = 0.40 * GetScreenWidth() / 15.f;
+	float heartHeight = heartWidth;
+	float startHeart = GetScreenWidth() - 5 * heartWidth;
+	int chooseHeart = 0;
+
+
+	for (int i = 0; i < 5; i++) {
+		if (gameData.player.health[i] > 10.f) chooseHeart = 0;
+		else if (gameData.player.health[i] > 0.f) chooseHeart = 1;
+		else chooseHeart = 2;
+
+		DrawTexturePro(
+			assetManager.hearts,
+			{chooseHeart*32.f, 0.f, 32.f, 32.f },
+			{startHeart+i*heartWidth, 10.f, heartWidth, heartHeight},
+			{0.f, 0.f},
+			0.f,
+			WHITE
+		);
+	}
 	
 
 
