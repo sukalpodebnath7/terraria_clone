@@ -5,7 +5,11 @@ void Zombie::entityBehaviour(Transform2D& playerTransform) {
 	frameCount++;
 	playerDetected = playerDetectionCheck(playerTransform);
 	bool shouldAttack = playerTransform.intersectTransform(transform) || playerTransform.intersectPoint(transform.pos);
-	
+	float delta = playerTransform.pos.x - transform.pos.x;
+	float direct = delta >= 0 ? 1 : -1;
+
+
+
 	if (playerDetected) {
 		if (shouldAttack) {
 			state = Entity::attacking;
@@ -13,6 +17,9 @@ void Zombie::entityBehaviour(Transform2D& playerTransform) {
 			if (frameCount >= 100) {
 				player.takenDamage += attackDamage;
 				frameCount = 0;
+				player.velocity.y = -5;
+				player.downTouch = 0;
+				player.velocity.x = direct * 10;
 			}
 		}
 		else {

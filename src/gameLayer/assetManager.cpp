@@ -14,4 +14,5 @@ void AssetManager::loadAll() {
 	caveBg = LoadTexture(RESOURCES_PATH "caveBg2.png");
 	hearts = LoadTexture(RESOURCES_PATH "hearts.png");
 	recipeBook = LoadTexture(RESOURCES_PATH "recipeBook.png");
+	tools = LoadTexture(RESOURCES_PATH "items.png");
 }

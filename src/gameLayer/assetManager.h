@@ -16,6 +16,6 @@ struct AssetManager {
 	Texture2D caveBg;
 	Texture2D hearts;
 	Texture2D recipeBook;
-
+	Texture2D tools;
 	void loadAll();
 };

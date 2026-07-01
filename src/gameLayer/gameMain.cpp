@@ -18,6 +18,7 @@
 #include <utility>
 #include <string>
 #include <helper.h>
+#include <recipeBook.h>
 using namespace std;
 
 
@@ -54,7 +55,8 @@ bool handEmpty = true;
 float transition = 0.f;
 bool changing = false;
 bool showRecipe = false;
-
+vector<int> recipeItems = { 70,71,72,73,74,75,76,78,79,80,81,82,83,84, 89,90,91,92,93,100,101,106,107,108 };
+//matrix size 4x6
 
 
 bool initGame() {
@@ -148,7 +150,7 @@ bool updateGame() {
 		gameData.player.velocity.x = cameraSpeed;
 	}
 
-	if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
+	if (gameData.player.downTouch && !IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
 		gameData.player.velocity.x = 0;
 	}
 
@@ -269,7 +271,6 @@ bool updateGame() {
 
 
 	}
-
 
 
 
@@ -490,6 +491,83 @@ bool updateGame() {
 			0.f,
 			WHITE
 		);
+
+		float startX = 0.12f * GetScreenWidth();
+		float diffX = 0.01 * GetScreenWidth();
+		float itemWidth = (GetScreenWidth() - 2*startX - diffX) / 6.f - (15 * (GetScreenWidth()/1920.f));
+
+		float startY = 0.20f * GetScreenHeight();
+		float diffY = 0.05 * GetScreenHeight();
+		float itemHeight = (GetScreenHeight() - 2*startY - diffY) / 4.f;
+
+		DrawTextPro(
+			GetFontDefault(),
+			"RECIPE BOOK",
+			Vector2{0.38f * GetScreenWidth(), 0.1f * GetScreenHeight()},
+			{ 0, 0 },
+			0.0f,
+			50.0f,
+			20.0f,
+			BLACK
+
+		);
+
+		//std::cout << GetScreenWidth() << std::endl;
+		int toolCount = 0;
+		for (int y = 0; y < 4; y++) {
+			float posY = startY + diffY * y + itemHeight * y;
+			for (int x = 0; x < 6; x++) {	
+				float posX = startX + diffX * x + itemWidth * x;
+				DrawRectangleLinesEx(
+					{ posX, posY, itemWidth, itemHeight },
+					3,
+					 { 63, 21, 0, 128 } 
+				);
+
+
+				float posItemX = posX;
+				float posItemY = posY;
+				DrawTexturePro(
+					assetManager.tools,
+					{(float)(recipeItems[toolCount] - 70)*32.f, 0.f, 32.f, 32.f},
+					{posItemX, posItemY, itemWidth/3.f, itemHeight/2.f},
+					{0.f,0.f},
+					0.f,
+					WHITE
+				);
+				float d = 1;
+				for (int i = 0; i < recipeBook[recipeItems[toolCount]].size(); i++) {
+					pair<int, int> block = recipeBook[recipeItems[toolCount]][i];
+					DrawTexturePro(
+						assetManager.textures,
+						{block.first*32.f, 0.f, 32.f, 32.f},
+						{(float)(posItemX + i* (itemWidth/3.f) + 1), (float)(posItemY + itemHeight/2.f + 10 ), itemWidth / 6.f, itemHeight / 4.f },
+						{0.f,0.f},
+						0.f,
+						WHITE
+					);
+
+					DrawTextPro(
+						GetFontDefault(),
+						to_string(block.second).c_str(),
+						Vector2{ (float)(posItemX + i * (itemWidth / 3.f) + 1) + itemWidth/6.f, (float)(posItemY + itemHeight / 2.f + 10) + itemHeight/4.f},
+						{ 0, 0 },
+						0.0f,
+						20.0f,
+						5.0f,
+						BLACK
+
+					);
+				}
+
+				
+
+
+				toolCount++;
+
+
+			}
+		}
 	}
 
 

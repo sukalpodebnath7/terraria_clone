@@ -2,7 +2,7 @@
 
 struct Tool {
 
-    public enum ItemType
+    enum
     {
         // Wood Tier Tools
         WoodPickaxe = 70,
@@ -84,7 +84,7 @@ struct Tool {
         IronChestplate = 120,
         IronHelmet = 121,
         IronBoots = 122
-    }
+    };
 
 
      int type;
