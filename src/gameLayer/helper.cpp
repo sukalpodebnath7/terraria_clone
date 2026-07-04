@@ -50,3 +50,59 @@ int setBg(vector<int>& bg, GameMap& gameMap, int sX, int sY, int eX, int eY, int
 
 
 }
+
+
+
+bool isBuilable(map<int, pair<Item, int>>& inventory, int tool) {
+	vector<pair<int, int>>& itemRequired = recipeBook[tool];
+
+
+	for (auto item : itemRequired) {
+		bool isFound = false;
+		int cnt;
+		for (auto i : inventory) {
+			if (i.second.first.type == item.first) {
+				isFound = true;
+				cnt = i.second.second;
+			}
+		}
+		if (inventory.empty() || !isFound)
+			return false;
+
+		if (cnt < item.second) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
+void buildTool(map<int, pair<Item, int>>& inventory, int tool, GameMap& gameMap) {
+	vector<pair<int, int>>& itemRequired = recipeBook[tool];
+
+	for (auto item : itemRequired) {
+		for (auto& i : inventory) {
+			if (i.second.first.type == item.first) {
+				i.second.second -= item.second;
+			}
+		}
+	}
+	Item Tool{ gameMap };
+	Tool.type = tool;
+	
+	inventory[tool] = { Tool, 1 };
+}
+
+void updateInventory(map<int, pair<Item, int>>& inventory) {
+	vector<int> removed;
+	for (auto i : inventory) {
+		if (i.second.second == 0) {
+			removed.push_back(i.first);
+		}
+	}
+
+	for (auto i : removed) {
+		inventory.erase(i);
+	}
+}

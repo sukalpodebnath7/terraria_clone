@@ -55,7 +55,7 @@ bool handEmpty = true;
 float transition = 0.f;
 bool changing = false;
 bool showRecipe = false;
-vector<int> recipeItems = { 70,71,72,73,74,75,76,78,79,80,81,82,83,84, 89,90,91,92,93,100,101,106,107,108 };
+vector<int> recipeItems = { 70,71,72,73,74,75,76,78,79,80,81,82,83,84, 89,90,91,92,93,100,103,106,107,108 };
 //matrix size 4x6
 
 
@@ -91,6 +91,7 @@ bool initGame() {
 
 bool updateGame() {
 
+	updateInventory(gameData.inventory);
 	static float ballX = 100, ballY = 30;
 	static float cameraZoom = 50;
 	static int cameraSpeed = 10.f;
@@ -224,7 +225,9 @@ bool updateGame() {
 
 	//std::cout << blockX << " " << blockY << std::endl;
 
-	if (!showimgui) {
+	if (!showimgui && !showRecipe) {
+
+// --------------------- Block Breaking and Item Creation Logic ------------------------------
 		Block blk = gameData.gameMap.getBlock(blockX, blockY);
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			int type = blk.type;
@@ -238,7 +241,7 @@ bool updateGame() {
 			gameData.gameMap.getBlock(blockX, blockY).type = Block::air;
 		}
 		Transform2D block = { {blockX + 0.5, blockY + 0.5}, 1, 1 };
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !gameData.player.transform.intersectTransform(block) && (gameData.gameMap.getBlock(blockX,blockY).type == Block::air || !blk.isCollidable() ) && !handEmpty ) {
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !gameData.player.transform.intersectTransform(block) && (gameData.gameMap.getBlock(blockX,blockY).type == Block::air || !blk.isCollidable() ) && !handEmpty && gameData.selectedBlockType < 70) {
 			gameData.gameMap.getBlock(blockX, blockY).type = gameData.selectedBlockType;
 			gameData.inventory[gameData.selectedBlockType].second--;
 			if (gameData.inventory[gameData.selectedBlockType].second == 0) {
@@ -374,7 +377,7 @@ bool updateGame() {
 
 
 
-	
+	// -------------- Selection Logic --------------------------
 	if (showimgui) {
 		Rectangle rect;
 		rect.x = gameData.selectionStart.x;
@@ -385,6 +388,10 @@ bool updateGame() {
 		DrawRectangleLinesEx(rect, 0.1, { 20,101,250,255 });
 	} 
 
+	// -----------------------------------------------------------
+
+	//------------------------- Frame Drawing -----------------------------
+
 	DrawTexturePro(
 		assetManager.frame,
 		{ 0,0,(float)assetManager.frame.width, (float)assetManager.frame.height },
@@ -393,7 +400,9 @@ bool updateGame() {
 		0.f,
 		WHITE
 	);
+	//---------------------------------------------------------------------
 
+	// ----------------------- Dropped Block to Inventory Logic ---------------------------
 	for (auto it = gameData.dropedItems.begin(); it != gameData.dropedItems.end(); ) {
 		it->dropPrint(deltaTime, assetManager.texturesbg);
 		float dx = it->transform.pos.x - gameData.player.transform.pos.x;
@@ -431,11 +440,15 @@ bool updateGame() {
 	}
 
 
-	gameData.zombie.entityAnimation();
-	gameData.player.entityAnimation();
-	DrawRectangleLinesEx(gameData.player.transform.getAABB(), 0.1, BLANK); //player aabb
+	
 
-
+	// --------------------------- Block In Hand Drawing ---------------------------------
+	static float toolSize = 0.f;
+	static float toolY = 0;
+	static float toolX = 0;
+	float ex = 0;
+	float ej = 0.f;
+	float exx = 0.20f;
 	if (!handEmpty) {
 
 		auto it = gameData.inventory.begin(); 
@@ -443,36 +456,71 @@ bool updateGame() {
 			it++;
 		}
 		gameData.selectedBlockType = it->second.first.type;
+		
+		Texture2D inTex = assetManager.texturesbg;
+		
+
+		if (gameData.selectedBlockType >= 70) {
+			gameData.selectedBlockType -= 70;
+			inTex = assetManager.tools;
+			toolSize = 0.294f;
+			toolY = -0.418;
+			toolX = -0.100f;
+			ex = 0.30f;
+			ej = 0.50f;
+			exx = 0.20f;
+		}
+		else {
+			toolSize = 0;
+			toolY = 0;
+			toolX = 0;
+			ex = 0.20f;
+			ej = 0.20f;
+			exx = 0;
+		}
 
 		Rectangle rec;
 		if (gameData.player.state != PlayerEntity::jumping) {
 			if (gameData.player.direction == 1) {
-				rec = Rectangle{ gameData.player.transform.getRight().x, gameData.player.transform.getRight().y, 0.3f, 0.3f };
+				rec = Rectangle{ gameData.player.transform.getRight().x + toolX, gameData.player.transform.getRight().y + toolY, 0.3f + toolSize, 0.3f  + toolSize};
 			}
 			else {
-				rec = Rectangle{ gameData.player.transform.getLeft().x - 0.20f, gameData.player.transform.getLeft().y, 0.3f, 0.3f };
+				rec = Rectangle{ gameData.player.transform.getLeft().x - ex + toolX, gameData.player.transform.getLeft().y + toolY, 0.3f + toolSize, 0.3f + toolSize};
 			}
 		}
 
 		else {
 			if (gameData.player.direction == 1) {
-				rec = Rectangle{ gameData.player.transform.getTopLeft().x, gameData.player.transform.getTopLeft().y + 0.10f, 0.3f, 0.3f };
+				rec = Rectangle{ gameData.player.transform.getTopLeft().x + toolX +  exx , gameData.player.transform.getTopLeft().y + 0.10f + toolY, 0.3f + toolSize, 0.3f + toolSize };
 			}
 			else {
-				rec = Rectangle{ gameData.player.transform.getTopRight().x - 0.20f, gameData.player.transform.getTopRight().y + 0.10f, 0.3f, 0.3f };
+				rec = Rectangle{ gameData.player.transform.getTopRight().x - ej + toolX , gameData.player.transform.getTopRight().y + 0.10f + toolY, 0.3f + toolSize, 0.3f + toolSize};
 			}
 		}
 
+		Rectangle src;
+		if (gameData.player.direction == 1) {
+			src = { gameData.selectedBlockType * 32.f, 0.f, 32.f, 32.f };
+		}
+		else {
+			src = { (gameData.selectedBlockType) * 32.f, 0.f, -32.f, 32.f };
+		}
 
 		DrawTexturePro(
-			assetManager.texturesbg,
-			{it->second.first.type*32.f, 0, 32.f, 32.f},
+			inTex,
+			src,
 			rec,
 			{0.f,0.f},
 			0.f,
 			WHITE
 		);
 	}
+
+
+	// ---------------------------------- Player Drawing ----------------------------
+	gameData.zombie.entityAnimation();
+	gameData.player.entityAnimation();
+	DrawRectangleLinesEx(gameData.player.transform.getAABB(), 0.1, BLANK); //player aabb
 
 	
 
@@ -482,6 +530,8 @@ bool updateGame() {
 	
 	if (IsKeyPressed(KEY_C)) showRecipe = !showRecipe;
 
+
+	//---------------------------Recipe Book Drawing -------------------------------
 	if (showRecipe) {
 		DrawTexturePro(
 			assetManager.recipeBook,
@@ -518,10 +568,27 @@ bool updateGame() {
 			float posY = startY + diffY * y + itemHeight * y;
 			for (int x = 0; x < 6; x++) {	
 				float posX = startX + diffX * x + itemWidth * x;
-				DrawRectangleLinesEx(
+				Color boundary = { 63, 21, 0, 128 };
+				Vector2 mousePos = GetMousePosition();
+
+				if (mousePos.x >= posX + 5 && mousePos.x <= posX + itemWidth - 5 && mousePos.y >= posY + 5 && mousePos.y <= posY + itemHeight - 5) {
+					if (isBuilable(gameData.inventory, recipeItems[toolCount])) {
+						boundary = GREEN;
+						if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+							buildTool(gameData.inventory, recipeItems[toolCount], gameData.gameMap);
+						}
+					}
+					else {
+						boundary = RED;
+					}
+				}
+
+				DrawRectangleRoundedLines(
 					{ posX, posY, itemWidth, itemHeight },
+					0.2f,
+					16,
 					3,
-					 { 63, 21, 0, 128 } 
+					 boundary 
 				);
 
 
@@ -530,7 +597,7 @@ bool updateGame() {
 				DrawTexturePro(
 					assetManager.tools,
 					{(float)(recipeItems[toolCount] - 70)*32.f, 0.f, 32.f, 32.f},
-					{posItemX, posItemY, itemWidth/3.f, itemHeight/2.f},
+					{posItemX + 20, posItemY + 5, itemWidth/3.f, itemHeight/2.f},
 					{0.f,0.f},
 					0.f,
 					WHITE
@@ -541,7 +608,7 @@ bool updateGame() {
 					DrawTexturePro(
 						assetManager.textures,
 						{block.first*32.f, 0.f, 32.f, 32.f},
-						{(float)(posItemX + i* (itemWidth/3.f) + 1), (float)(posItemY + itemHeight/2.f + 10 ), itemWidth / 6.f, itemHeight / 4.f },
+						{(float)(posItemX + i* (itemWidth/3.f) + 1) + 5, (float)(posItemY + itemHeight/2.f + 10 ), itemWidth / 6.f, itemHeight / 4.f },
 						{0.f,0.f},
 						0.f,
 						WHITE
@@ -576,7 +643,7 @@ bool updateGame() {
 
 
 
-	//inventoryDrawing:
+	//------------------------inventoryDrawing---------------------------------------
 	float inventoryWidth = 0.40f*GetScreenWidth()/10.f;
 	float inventoryHeight = inventoryWidth;
 	auto itemIt = gameData.inventory.begin();
@@ -591,9 +658,15 @@ bool updateGame() {
 		);
 
 		if (itemIt != gameData.inventory.end()) {
+			Texture2D inTex = assetManager.texturesbg;
+			int itemType = itemIt->second.first.type;
+			if (itemIt->second.first.type >= 70) {
+				itemType -= 70;
+				inTex = assetManager.tools;
+			}
 			DrawTexturePro(
-				assetManager.texturesbg,
-				{ itemIt->second.first.type * 32.f, 0.f , 32.f, 32.f },
+				inTex,
+				{ itemType * 32.f, 0.f , 32.f, 32.f },
 				{ 0.30f * GetScreenWidth() + i * inventoryWidth + 10.f, GetScreenHeight() - inventoryHeight + 10.f, inventoryHeight - 20.f, inventoryWidth -20.f },
 				{ 0.f, 0.f },
 				0.f,
@@ -651,6 +724,9 @@ bool updateGame() {
 	if (showimgui) {
 
 		ImGui::Begin("test");
+		ImGui::SliderFloat("toolSize", &toolSize, 0.f, 1.f);
+		ImGui::SliderFloat("toolY", &toolY, -1.f, 1.f);
+		ImGui::SliderFloat("toolX", &toolX, -1.f, 1.f);
 		ImGui::SliderFloat("up", &up, 0, 50);
 		ImGui::SliderFloat("jump", &jump, 10, 50);
 		ImGui::SliderFloat("up/down", &down, -500.f, 500.f);

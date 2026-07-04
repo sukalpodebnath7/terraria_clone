@@ -7,7 +7,7 @@
 
 using namespace std;
 
-unordered_map<int, vector<pair<int, int>>> recipeBook = {
+inline unordered_map<int, vector<pair<int, int>>> recipeBook = {
 
     // --- WOOD TIER TOOLS ---
     { Tool::WoodPickaxe,       { {Block::woodPlank, 3}, {Block::woodLog, 2} } },
