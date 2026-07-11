@@ -15,4 +15,17 @@ void AssetManager::loadAll() {
 	hearts = LoadTexture(RESOURCES_PATH "hearts.png");
 	recipeBook = LoadTexture(RESOURCES_PATH "recipeBook.png");
 	tools = LoadTexture(RESOURCES_PATH "items.png");
+	//sounds
+   blockBreak = LoadSound(RESOURCES_PATH "resources/sounds/break.ogg");
+   place = LoadSound(RESOURCES_PATH "resources/sounds/place.ogg");
+   playerAttack = LoadSound(RESOURCES_PATH "resources/sounds/bonus/Hit1.ogg");
+   playerDamage = LoadSound(RESOURCES_PATH "resources/sounds/bonus/Hit2.ogg");
+   chest = LoadSound(RESOURCES_PATH "resources/sounds/bonus/CheckBoxOn.ogg");
+   enemyDead = LoadSound(RESOURCES_PATH"resources/sounds/FinalHit1.ogg");
+
+
+   //music
+   forestBG = LoadMusicStream(RESOURCES_PATH "resources/music/forest.ogg");
+   snowBG = LoadMusicStream(RESOURCES_PATH "resources/music/snow");
+   desertBG = LoadMusicStream(RESOURCES_PATH "resources/music/desert.ogg");
 }
