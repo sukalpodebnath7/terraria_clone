@@ -9,6 +9,7 @@ struct Zombie : public Entity {
 		 entityWidth = 32;
 		 entityHeight = 64;
 		 attackDamage = 5.f;
+		 entityHealth = 50.f;
 	}
 
 	void entityBehaviour(Transform2D& playerTrasform) override;

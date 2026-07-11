@@ -27,6 +27,8 @@ struct PlayerEntity : public PhysicalEntity {
 	float health[5] = { 20.f, 20.f, 20.f, 20.f, 20.f };
 	float lastDownTouch;
 	float takenDamage = 0.f;
-
+	int tempState = 0;
+	int inHandBlock = 0;
 	void updateHealth();
+	void attackAnimation();
 };

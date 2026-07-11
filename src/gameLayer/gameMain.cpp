@@ -19,6 +19,7 @@
 #include <string>
 #include <helper.h>
 #include <recipeBook.h>
+#include <randomFuncs.h>
 using namespace std;
 
 
@@ -39,7 +40,6 @@ struct GameData {
 	char saveName[100] = {};
 
 	PlayerEntity player;
-	Zombie zombie{ gameMap , player};
 	vector<Item> dropedItems;
 	map<int, pair<Item, int>> inventory;
 	vector<int> bg;
@@ -47,6 +47,9 @@ struct GameData {
 
 
 }gameData;
+
+Zombie* zombie;
+vector<Zombie*> zombies;
 
 AssetManager assetManager;
 bool showimgui = false;
@@ -60,6 +63,8 @@ vector<int> recipeItems = { 70,71,72,73,74,75,76,78,79,80,81,82,83,84, 89,90,91,
 
 
 bool initGame() {
+	//zombie = new Zombie{ gameData.gameMap, gameData.player };
+
 	gameData.camera.target = { 100,120 };
 	gameData.camera.rotation = 0.0f;
 	gameData.camera.zoom = 100;
@@ -75,11 +80,11 @@ bool initGame() {
 	gameData.player.selectedBlock = 1;
 	gameData.player.lastDownTouch = gameData.player.transform.pos.y;
 
-	gameData.zombie.transform = { {105.5f,150.5f}, 0.8f, 1.8f };
-	gameData.zombie.entityTex = assetManager.zombie;
+	//zombie->transform = { {105.5f,150.5f}, 0.8f, 1.8f };
+	//zombie->entityTex = assetManager.zombie;
 	//gameData.zombie.gameMap = gameData.gameMap;
-	gameData.zombie.teleport({ 120.7f, 200.5f });
-	gameData.zombie.entityTex = assetManager.zombie;
+	//zombie->teleport({ 120.7f, 200.5f });
+	//zombie->entityTex = assetManager.zombie;
 
 	gameData.bg.resize(4); // 0-> forest, 1 -> mountain, 2-> desert, 3 -> ice
 	gameData.bg = { 0,0,0,0 };
@@ -89,8 +94,54 @@ bool initGame() {
 }
 
 
+
+std::ranlux24_base rng(69);
+
+void spawnZombie(vector<Zombie*>& zombies, PlayerEntity& player, GameMap& gameMap, Texture2D tex) {
+	if (zombies.size() == 10) return;
+
+	if (getRandomFloat(rng, 0, 1) < 0.5f) {
+		Zombie* z = new Zombie{ gameMap, player };
+		z->entityTex = tex;
+		z->transform.w = 0.8f;
+		z->transform.h = 1.8f;
+		float d = getRandomInt(rng, -1, 1);
+		if (d == 0) d = -1;
+		z->transform.pos.x = player.transform.pos.x + d * GetScreenWidth() / 2;
+		z->transform.pos.y = player.transform.pos.y + d * GetScreenHeight() / 2;
+		z->teleport(z->transform.pos);
+
+		zombies.push_back(z);
+	}
+}
+
+void despawnZombie(vector<Zombie*>& zombies, PlayerEntity& player) {
+	for (auto& it : zombies) {
+		if (it != nullptr) {
+			if (abs(it->transform.pos.x - player.transform.pos.x) >= 50.f) {
+				it = nullptr;
+			}
+		}
+	}
+	for (int i = 0; i < zombies.size(); i++) {
+		if (zombies[i] == nullptr) {
+			zombies.erase(zombies.begin() + i);
+			i--;
+		}
+	}
+}
+
+
 bool updateGame() {
 
+
+	//-------------------------zombie spawning ---------------------------
+	spawnZombie(zombies, gameData.player, gameData.gameMap, assetManager.zombie);
+	despawnZombie(zombies, gameData.player);
+
+	if (handEmpty) gameData.selectedBlockType = 0;
+	gameData.player.inHandBlock = gameData.selectedBlockType;
+	gameData.player.updateHealth();
 	updateInventory(gameData.inventory);
 	static float ballX = 100, ballY = 30;
 	static float cameraZoom = 50;
@@ -100,7 +151,7 @@ bool updateGame() {
 
 	float deltaTime = GetFrameTime();
 	deltaTime = Clamp(deltaTime, 0.f, 1 / 5.f);
-	gameData.zombie.deltaTime = deltaTime;
+	if(zombie!= nullptr) zombie->deltaTime = deltaTime;
 	gameData.camera.offset = { GetScreenWidth() / 2.f, GetScreenHeight() / 2.f };
 	BeginMode2D(gameData.camera);
 
@@ -116,7 +167,20 @@ bool updateGame() {
 
 
 	//----zombie check -----
-	gameData.zombie.entityBehaviour(gameData.player.transform);
+	
+
+	for (auto& zombie : zombies) {
+		if (zombie != nullptr) {
+			zombie->entityBehaviour(gameData.player.transform);
+			zombie->entityAttacked();
+
+			if (zombie->entityHealth <= 0.f) {
+				delete zombie;
+				zombie = nullptr;
+			}
+		}
+	}
+	
 
 
 
@@ -179,7 +243,7 @@ bool updateGame() {
 		//if(delta != 0.f) std::cout << delta << std::endl;
 	}
 
-	gameData.player.updateHealth();
+	
 	//std::cout << gameData.player.health[0] << std::endl;
 
 
@@ -229,24 +293,43 @@ bool updateGame() {
 
 // --------------------- Block Breaking and Item Creation Logic ------------------------------
 		Block blk = gameData.gameMap.getBlock(blockX, blockY);
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			int type = blk.type;
-			if (type != Block::air) {
-				Item item{ gameData.gameMap };
-				item.type = type;
-				item.transform.pos = vec{ (float)blockX + 0.5f, (float)blockY + 0.5f };
-				item.transform.w = 0.7f; item.transform.h = 0.8f;
-				gameData.dropedItems.push_back(item);
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+
+			if (gameData.selectedBlockType >= 70) {
+				gameData.player.state = PlayerEntity::attacking;
 			}
-			gameData.gameMap.getBlock(blockX, blockY).type = Block::air;
+			else{
+				int type = blk.type;
+				if (type != Block::air) {
+					Item item{ gameData.gameMap };
+					item.type = type;
+					if (type == Block::leaves) {
+						std::ranlux24_base rng(69);
+						if (getRandomFloat(rng, 0, 1) <= 1) {
+							item.type = Tool::Apple;
+						}
+					}
+					item.transform.pos = vec{ (float)blockX + 0.5f, (float)blockY + 0.5f };
+					item.transform.w = 0.7f; item.transform.h = 0.8f;
+					gameData.dropedItems.push_back(item);
+				}
+				gameData.gameMap.getBlock(blockX, blockY).type = Block::air;
+			}
+			
 		}
 		Transform2D block = { {blockX + 0.5, blockY + 0.5}, 1, 1 };
-		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !gameData.player.transform.intersectTransform(block) && (gameData.gameMap.getBlock(blockX,blockY).type == Block::air || !blk.isCollidable() ) && !handEmpty && gameData.selectedBlockType < 70) {
-			gameData.gameMap.getBlock(blockX, blockY).type = gameData.selectedBlockType;
-			gameData.inventory[gameData.selectedBlockType].second--;
-			if (gameData.inventory[gameData.selectedBlockType].second == 0) {
-				gameData.inventory.erase(gameData.selectedBlockType);
-				handEmpty = true;
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+			if (gameData.selectedBlockType >= 70) {
+				toolFunction(gameData.selectedBlockType, gameData.player, gameData.inventory, false);
+			}
+
+			else if(!gameData.player.transform.intersectTransform(block) && (gameData.gameMap.getBlock(blockX, blockY).type == Block::air || !blk.isCollidable()) && !handEmpty){
+				gameData.gameMap.getBlock(blockX, blockY).type = gameData.selectedBlockType;
+				gameData.inventory[gameData.selectedBlockType].second--;
+				if (gameData.inventory[gameData.selectedBlockType].second == 0) {
+					gameData.inventory.erase(gameData.selectedBlockType);
+					handEmpty = true;
+				}
 			}
 		}
 	}
@@ -404,7 +487,9 @@ bool updateGame() {
 
 	// ----------------------- Dropped Block to Inventory Logic ---------------------------
 	for (auto it = gameData.dropedItems.begin(); it != gameData.dropedItems.end(); ) {
-		it->dropPrint(deltaTime, assetManager.texturesbg);
+		Texture2D tex = assetManager.texturesbg;
+		if (it->type >= 70) tex = assetManager.tools;
+		it->dropPrint(deltaTime, tex);
 		float dx = it->transform.pos.x - gameData.player.transform.pos.x;
 		float dy = it->transform.pos.y - gameData.player.transform.pos.y;
 		float distSq = dx * dx + dy * dy;
@@ -458,10 +543,11 @@ bool updateGame() {
 		gameData.selectedBlockType = it->second.first.type;
 		
 		Texture2D inTex = assetManager.texturesbg;
-		
+		int selectType = gameData.selectedBlockType;
 
 		if (gameData.selectedBlockType >= 70) {
-			gameData.selectedBlockType -= 70;
+			
+			selectType -= 70;
 			inTex = assetManager.tools;
 			toolSize = 0.294f;
 			toolY = -0.418;
@@ -480,7 +566,7 @@ bool updateGame() {
 		}
 
 		Rectangle rec;
-		if (gameData.player.state != PlayerEntity::jumping) {
+		if (gameData.player.state != PlayerEntity::jumping && gameData.player.state != PlayerEntity::attacking) {
 			if (gameData.player.direction == 1) {
 				rec = Rectangle{ gameData.player.transform.getRight().x + toolX, gameData.player.transform.getRight().y + toolY, 0.3f + toolSize, 0.3f  + toolSize};
 			}
@@ -488,7 +574,26 @@ bool updateGame() {
 				rec = Rectangle{ gameData.player.transform.getLeft().x - ex + toolX, gameData.player.transform.getLeft().y + toolY, 0.3f + toolSize, 0.3f + toolSize};
 			}
 		}
+		else if (gameData.player.state == PlayerEntity::attacking) {
+			if (gameData.player.tempState != PlayerEntity::jumping) {
+				if (gameData.player.direction == 1) {
+					rec = Rectangle{ gameData.player.transform.getRight().x + toolX, gameData.player.transform.getRight().y + toolY, 0.3f + toolSize, 0.3f + toolSize };
+				}
+				else {
+					rec = Rectangle{ gameData.player.transform.getLeft().x - ex + toolX, gameData.player.transform.getLeft().y + toolY, 0.3f + toolSize, 0.3f + toolSize };
 
+				}
+			}
+			else {
+				if (gameData.player.direction == 1) {
+					rec = Rectangle{ gameData.player.transform.getTopLeft().x + toolX + exx , gameData.player.transform.getTopLeft().y + 0.10f + toolY, 0.3f + toolSize, 0.3f + toolSize };
+				}
+				else {
+					rec = Rectangle{ gameData.player.transform.getTopRight().x - ej + toolX , gameData.player.transform.getTopRight().y + 0.10f + toolY, 0.3f + toolSize, 0.3f + toolSize };
+				}
+			}
+			
+		}
 		else {
 			if (gameData.player.direction == 1) {
 				rec = Rectangle{ gameData.player.transform.getTopLeft().x + toolX +  exx , gameData.player.transform.getTopLeft().y + 0.10f + toolY, 0.3f + toolSize, 0.3f + toolSize };
@@ -500,10 +605,10 @@ bool updateGame() {
 
 		Rectangle src;
 		if (gameData.player.direction == 1) {
-			src = { gameData.selectedBlockType * 32.f, 0.f, 32.f, 32.f };
+			src = { selectType * 32.f, 0.f, 32.f, 32.f };
 		}
 		else {
-			src = { (gameData.selectedBlockType) * 32.f, 0.f, -32.f, 32.f };
+			src = { (selectType) * 32.f, 0.f, -32.f, 32.f };
 		}
 
 		DrawTexturePro(
@@ -518,7 +623,10 @@ bool updateGame() {
 
 
 	// ---------------------------------- Player Drawing ----------------------------
-	gameData.zombie.entityAnimation();
+
+	for (auto& zombie : zombies) {
+		if (zombie != nullptr) zombie->entityAnimation();
+	}
 	gameData.player.entityAnimation();
 	DrawRectangleLinesEx(gameData.player.transform.getAABB(), 0.1, BLANK); //player aabb
 

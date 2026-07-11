@@ -5,6 +5,12 @@
 #include <map>
 #include <items.h>
 #include <unordered_map>
+#include <player.h>
+#include <tools.h>
+#include <raylib.h>
+#include <randomFuncs.h>
+#include <random>
+#include <zombie.h>
 using namespace std;
 
 
@@ -15,3 +21,7 @@ bool isBuilable(map<int, pair<Item, int>>& inventory, int tool);
 void buildTool(map<int, pair<Item, int>>& inventory, int tool, GameMap& gameMap);
 
 void updateInventory(map<int, pair<Item, int>>& inventory);
+
+void toolFunction(int type, PlayerEntity& player, map<int, pair<Item, int>>& inventory, bool leftPress);
+
+float getDamage(int tooltype);

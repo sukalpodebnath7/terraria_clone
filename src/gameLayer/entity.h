@@ -4,6 +4,7 @@
 #include <gameMap.h>
 #include <iostream>
 #include <player.h>
+#include <helper.h>
 using namespace std;
 
 struct Entity : public PhysicalEntity {
@@ -71,6 +72,23 @@ struct Entity : public PhysicalEntity {
 	virtual void entityBehaviour(Transform2D& playerTransform) = 0;
 	virtual void entityAction(Transform2D& player) = 0;
 
+	inline void entityAttacked() {
+		if (damageFrame >= 24) {
+			if (player.state == PlayerEntity::attacking && player.transform.intersectTransform(transform)) {
+				entityTakenDamage = getDamage(player.inHandBlock);
+				entityHealthUpdate();
+				entityTakenDamage = 0.f; 
+			}
+			damageFrame = 0;
+		}
+		damageFrame++;
+	}
+
+
+	inline void entityHealthUpdate() {
+		entityHealth = std::max(0.f, entityHealth - entityTakenDamage);
+	}
+
 	inline bool playerDetectionCheck(Transform2D& player) {
 		
 		float delX = abs(transform.pos.x - player.pos.x);
@@ -89,4 +107,7 @@ struct Entity : public PhysicalEntity {
 	GameMap& gameMap;
 	PlayerEntity& player;
 	int frameCount = 0;
+	float entityHealth;
+	float entityTakenDamage = 0.f;
+	float damageFrame = 0;
 };

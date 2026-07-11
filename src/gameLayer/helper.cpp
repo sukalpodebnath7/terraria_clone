@@ -106,3 +106,66 @@ void updateInventory(map<int, pair<Item, int>>& inventory) {
 		inventory.erase(i);
 	}
 }
+
+void toolFunction(int type, PlayerEntity& player, map<int, pair<Item, int>>& inventory, bool leftPress) {
+	if (type == Tool::Apple && inventory[type].second > 0) {
+		if (!leftPress) {
+			if (player.health[0] == 20.f) return;
+			player.takenDamage -= 10.f;
+			inventory[type].second--;
+		}
+	}
+}
+
+
+float getDamage(int toolType)
+{
+	switch (toolType)
+	{
+		// Wood Tier (Damage: 5)
+	case 70: // WoodPickaxe
+	case 71: // WoodAxe
+	case 72: // WoodHammer
+	case 89: // WoodSword
+		return 5;
+
+		// Stone Tier (Damage: 7)
+	case 73: // StonePickaxe
+	case 74: // StoneAxe
+	case 75: // StoneHammer
+	case 90: // StoneSword
+		return 7;
+
+		// Copper Tier (Damage: 9)
+	case 76: // CopperPickaxe
+	case 78: // CopperHammer
+	case 91: // CopperSword
+	case 106: // CopperDagger
+		return 9;
+
+		// Iron Tier (Damage: 12)
+	case 79: // IronPickaxe
+	case 80: // IronAxe
+	case 81: // IronHammer
+	case 92: // IronSword
+	case 108: // IronDagger
+		return 12;
+
+		// Gold / Elite Tier (Damage: 15)
+	case 82: // GoldPickaxe
+	case 83: // GoldAxe
+	case 84: // GoldHammer
+	case 93: // GoldSword
+	case 107: // StoneDagger (Assuming high tier placement or 15)
+		return 15;
+
+		// Non-weapon/Utility Items (Damage: 0)
+	case 100: // HealthPotion
+	case 103: // Book
+		return 0;
+
+	default:
+		return 0;
+	}
+}
+
