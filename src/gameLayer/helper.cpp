@@ -168,4 +168,3 @@ float getDamage(int toolType)
 		return 0;
 	}
 }
-

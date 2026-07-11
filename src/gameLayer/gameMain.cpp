@@ -93,22 +93,41 @@ bool initGame() {
 	return true;
 }
 
-
-
 std::ranlux24_base rng(69);
 
 void spawnZombie(vector<Zombie*>& zombies, PlayerEntity& player, GameMap& gameMap, Texture2D tex) {
 	if (zombies.size() == 10) return;
 
-	if (getRandomFloat(rng, 0, 1) < 0.5f) {
+	if (getRandomFloat(rng, 0, 1) < 0.0004f) {
 		Zombie* z = new Zombie{ gameMap, player };
+		int texDetect = getRandomInt(rng, -1, 1); // -1 -> zombie, 0 -> mummy , 1-> iceZombie
+		switch (texDetect) {
+		case -1:
+			tex = assetManager.zombie;
+			break;
+		case 0:
+			tex = assetManager.mummy;
+			break;
+		case 1:
+			tex = assetManager.iceZombie;
+			break;
+		}
 		z->entityTex = tex;
 		z->transform.w = 0.8f;
 		z->transform.h = 1.8f;
 		float d = getRandomInt(rng, -1, 1);
 		if (d == 0) d = -1;
-		z->transform.pos.x = player.transform.pos.x + d * GetScreenWidth() / 2;
-		z->transform.pos.y = player.transform.pos.y + d * GetScreenHeight() / 2;
+		int y = 0;
+		int zw = getRandomInt(rng, 30, 50);
+		z->transform.pos.x = player.transform.pos.x + d * zw;
+
+		for (; y < gameData.gameMap.h; y++) {
+			if (gameData.gameMap.getBlock(z->transform.pos.x, y).type != Block::air) {
+				break;
+			}
+		}
+
+		z->transform.pos.y = y-2;
 		z->teleport(z->transform.pos);
 
 		zombies.push_back(z);
@@ -131,13 +150,13 @@ void despawnZombie(vector<Zombie*>& zombies, PlayerEntity& player) {
 	}
 }
 
-
 bool updateGame() {
 
 
 	//-------------------------zombie spawning ---------------------------
 	spawnZombie(zombies, gameData.player, gameData.gameMap, assetManager.zombie);
 	despawnZombie(zombies, gameData.player);
+	cout << zombies.size() << endl;
 
 	if (handEmpty) gameData.selectedBlockType = 0;
 	gameData.player.inHandBlock = gameData.selectedBlockType;
@@ -169,14 +188,19 @@ bool updateGame() {
 	//----zombie check -----
 	
 
-	for (auto& zombie : zombies) {
+	for (int i = 0; i < zombies.size(); i++) {
+		auto& zombie = zombies[i];
 		if (zombie != nullptr) {
+			zombie->deltaTime = deltaTime;
 			zombie->entityBehaviour(gameData.player.transform);
+			zombie->entityAnimation();
 			zombie->entityAttacked();
 
 			if (zombie->entityHealth <= 0.f) {
 				delete zombie;
 				zombie = nullptr;
+				zombies.erase(zombies.begin() + i);
+				i--;
 			}
 		}
 	}

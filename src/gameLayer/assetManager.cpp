@@ -15,4 +15,6 @@ void AssetManager::loadAll() {
 	hearts = LoadTexture(RESOURCES_PATH "hearts.png");
 	recipeBook = LoadTexture(RESOURCES_PATH "recipeBook.png");
 	tools = LoadTexture(RESOURCES_PATH "items.png");
+	mummy = LoadTexture(RESOURCES_PATH "mumy.png");
+	iceZombie = LoadTexture(RESOURCES_PATH "zombie_eskimo.png");
 }

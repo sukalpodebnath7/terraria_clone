@@ -31,9 +31,7 @@ struct Entity : public PhysicalEntity {
 	int direction = 1;
 
 	inline void entityAnimation() {
-		static int  prevState = 0;
-		static int pos = 0;
-		static int frameCounter = 0;
+		
 
 		frameCounter++;
 
@@ -78,6 +76,10 @@ struct Entity : public PhysicalEntity {
 				entityTakenDamage = getDamage(player.inHandBlock);
 				entityHealthUpdate();
 				entityTakenDamage = 0.f; 
+				velocity.y = -5.f;
+				player.downTouch = 0;
+				velocity.x = velocity.x + (direction == 1? 1 : -1)  * 10;
+
 			}
 			damageFrame = 0;
 		}
@@ -94,7 +96,7 @@ struct Entity : public PhysicalEntity {
 		float delX = abs(transform.pos.x - player.pos.x);
 		float delY = abs(transform.pos.y - player.pos.y);
 
-		if (delX <= 20.f && delY <= 20.f)
+		if (delX <= 25.f && delY <= 25.f)
 			return true;
 
 
@@ -110,4 +112,7 @@ struct Entity : public PhysicalEntity {
 	float entityHealth;
 	float entityTakenDamage = 0.f;
 	float damageFrame = 0;
+	int  prevState = 0;
+	int pos = 0;
+	int frameCounter = 0;
 };

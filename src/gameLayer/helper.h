@@ -5,12 +5,11 @@
 #include <map>
 #include <items.h>
 #include <unordered_map>
-#include <player.h>
 #include <tools.h>
 #include <raylib.h>
 #include <randomFuncs.h>
 #include <random>
-#include <zombie.h>
+#include <player.h>
 using namespace std;
 
 

@@ -17,5 +17,7 @@ struct AssetManager {
 	Texture2D hearts;
 	Texture2D recipeBook;
 	Texture2D tools;
+	Texture2D mummy;
+	Texture2D iceZombie;
 	void loadAll();
 };
