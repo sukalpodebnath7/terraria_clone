@@ -15,6 +15,23 @@ void AssetManager::loadAll() {
 	hearts = LoadTexture(RESOURCES_PATH "hearts.png");
 	recipeBook = LoadTexture(RESOURCES_PATH "recipeBook.png");
 	tools = LoadTexture(RESOURCES_PATH "items.png");
+<<<<<<< HEAD
 	mummy = LoadTexture(RESOURCES_PATH "mumy.png");
 	iceZombie = LoadTexture(RESOURCES_PATH "zombie_eskimo.png");
 }
+=======
+	//sounds
+   blockBreak = LoadSound(RESOURCES_PATH "resources/sounds/break.ogg");
+   place = LoadSound(RESOURCES_PATH "resources/sounds/place.ogg");
+   playerAttack = LoadSound(RESOURCES_PATH "resources/sounds/bonus/Hit1.ogg");
+   playerDamage = LoadSound(RESOURCES_PATH "resources/sounds/bonus/Hit2.ogg");
+   chest = LoadSound(RESOURCES_PATH "resources/sounds/bonus/CheckBoxOn.ogg");
+   enemyDead = LoadSound(RESOURCES_PATH"resources/sounds/FinalHit1.ogg");
+
+
+   //music
+   forestBG = LoadMusicStream(RESOURCES_PATH "resources/music/forest.ogg");
+   snowBG = LoadMusicStream(RESOURCES_PATH "resources/music/snow");
+   desertBG = LoadMusicStream(RESOURCES_PATH "resources/music/desert.ogg");
+}
+>>>>>>> f87700f225a09011d83154fb2ee24d8a41934bcd

@@ -17,7 +17,22 @@ struct AssetManager {
 	Texture2D hearts;
 	Texture2D recipeBook;
 	Texture2D tools;
+<<<<<<< HEAD
 	Texture2D mummy;
 	Texture2D iceZombie;
+=======
+    //music
+    Music forestBG;
+    Music snowBG;
+    Music desertBG;
+
+   //sound
+    Sound blockBreak;
+    Sound place;
+    Sound playerAttack;
+    Sound playerDamage;
+    Sound chest;
+    Sound enemyDead;
+>>>>>>> f87700f225a09011d83154fb2ee24d8a41934bcd
 	void loadAll();
 };
