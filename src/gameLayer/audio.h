@@ -11,6 +11,18 @@ namespace Audio {
 	void update();
 
 	void playSound(int sound, float volume = 1);
+	void playMusic(int music);
+	void stopMusic();
+
+	enum MusicID {
+		forestMusic,
+		desertMusic,
+		mountainMusic,
+		snowMusic,
+		bossMusic,
+
+		MUSIC_COUNT
+	};
 
 	enum {
 		noneSound = 0,
