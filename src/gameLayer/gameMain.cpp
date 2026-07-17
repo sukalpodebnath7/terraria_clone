@@ -440,6 +440,24 @@ bool updateGame() {
 
 		gameData.prevBg = bgTex;
 	}
+	switch (count)
+	{
+	case 0:
+		Audio::playMusic(Audio::forestMusic);
+		break;
+
+	case 1:
+		Audio::playMusic(Audio::mountainMusic);
+		break;
+
+	case 2:
+		Audio::playMusic(Audio::desertMusic);
+		break;
+
+	case 3:
+		Audio::playMusic(Audio::snowMusic);
+		break;
+	}
 
 
 
@@ -923,5 +941,7 @@ bool updateGame() {
 }
 
 bool closeGame() {
+
+	Audio::stopMusic();
 	return true;
 }
