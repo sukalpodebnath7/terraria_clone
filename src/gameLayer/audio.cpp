@@ -11,6 +11,8 @@ namespace Audio {
 
 		loadAllMusicAndSounds();
 	}
+	std::vector<Music> allMusic;
+	int currentMusic = -1;
 
 	std::vector<Sound> allSounds;
 
@@ -41,9 +43,20 @@ namespace Audio {
 		loadSound(RESOURCES_PATH "sounds/crafting.ogg");
 		loadSound(RESOURCES_PATH "sounds/attacking.ogg");
 
+		allMusic.resize(MUSIC_COUNT);
+
+		allMusic[forestMusic] = LoadMusicStream(RESOURCES_PATH "music/forestBG.mp3");
+		allMusic[desertMusic] = LoadMusicStream(RESOURCES_PATH "music/desertBG.mp3");
+		allMusic[mountainMusic] = LoadMusicStream(RESOURCES_PATH "music/mountainBG.mp3");
+		allMusic[snowMusic] = LoadMusicStream(RESOURCES_PATH "music/snowBG.mp3");
+		allMusic[bossMusic] = LoadMusicStream(RESOURCES_PATH "music/boss_fightBG.mp3");
+
 	}
 
 	void update() {
+			if (currentMusic != -1)
+				UpdateMusicStream(allMusic[currentMusic]);
+		
 
 	}
 
@@ -60,5 +73,29 @@ namespace Audio {
 
 		SetSoundVolume(allSounds[sound], volume);
 		PlaySound(allSounds[sound]);
+	}
+	void playMusic(int music)
+	{
+		if (music == currentMusic)
+			return;
+
+		if (currentMusic != -1)
+			StopMusicStream(allMusic[currentMusic]);
+
+		currentMusic = music;
+
+		PlayMusicStream(allMusic[currentMusic]);
+	}
+	void stopMusic()
+	{
+		if (currentMusic != -1)
+		{
+			StopMusicStream(allMusic[currentMusic]);
+		}
+
+		for (auto& m : allMusic)
+			UnloadMusicStream(m);
+
+		CloseAudioDevice();
 	}
 }
