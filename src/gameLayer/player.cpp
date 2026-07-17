@@ -1,5 +1,6 @@
 #include <player.h>
 #include <iostream>
+#include <audio.h>
 
 static int  prevState = 0;
 static int pos = 0;
@@ -50,6 +51,7 @@ void PlayerEntity::updateHealth() {
 	if (takenDamage == 0.f) return;
 
 	if (takenDamage > 0.f) {
+		Audio::playSound(Audio::takenDamage);
 		for (int i = 0; i < 5; i++) {
 			if (health[i] - takenDamage >= 0.f) {
 				health[i] -= takenDamage;
@@ -91,9 +93,9 @@ void PlayerEntity::attackAnimation() {
 	}
 	if (pos <= 7)
 		tempState = jumping;
-	else
+	else {
 		tempState = standingWithBlock;
-
+	}
 	//if (prevState == jumping && state == moving) {}
 	if (state != prevState) {
 		prevState = state;

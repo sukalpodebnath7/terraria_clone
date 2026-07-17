@@ -20,6 +20,7 @@
 #include <helper.h>
 #include <recipeBook.h>
 #include <randomFuncs.h>
+#include <audio.h>
 using namespace std;
 
 
@@ -63,6 +64,8 @@ vector<int> recipeItems = { 70,71,72,73,74,75,76,78,79,80,81,82,83,84, 89,90,91,
 
 
 bool initGame() {
+
+	Audio::init();
 	//zombie = new Zombie{ gameData.gameMap, gameData.player };
 
 	gameData.camera.target = { 100,120 };
@@ -152,11 +155,11 @@ void despawnZombie(vector<Zombie*>& zombies, PlayerEntity& player) {
 
 bool updateGame() {
 
+	Audio::update();
 
 	//-------------------------zombie spawning ---------------------------
 	spawnZombie(zombies, gameData.player, gameData.gameMap, assetManager.zombie);
 	despawnZombie(zombies, gameData.player);
-	cout << zombies.size() << endl;
 
 	if (handEmpty) gameData.selectedBlockType = 0;
 	gameData.player.inHandBlock = gameData.selectedBlockType;
@@ -197,6 +200,7 @@ bool updateGame() {
 			zombie->entityAttacked();
 
 			if (zombie->entityHealth <= 0.f) {
+				Audio::playSound(Audio::entityDeath);
 				delete zombie;
 				zombie = nullptr;
 				zombies.erase(zombies.begin() + i);
@@ -325,6 +329,7 @@ bool updateGame() {
 			else{
 				int type = blk.type;
 				if (type != Block::air) {
+					Audio::playSound(Audio::breakBlock);
 					Item item{ gameData.gameMap };
 					item.type = type;
 					if (type == Block::leaves) {
@@ -348,6 +353,7 @@ bool updateGame() {
 			}
 
 			else if(!gameData.player.transform.intersectTransform(block) && (gameData.gameMap.getBlock(blockX, blockY).type == Block::air || !blk.isCollidable()) && !handEmpty){
+				Audio::playSound(Audio::placeBlock);
 				gameData.gameMap.getBlock(blockX, blockY).type = gameData.selectedBlockType;
 				gameData.inventory[gameData.selectedBlockType].second--;
 				if (gameData.inventory[gameData.selectedBlockType].second == 0) {
@@ -609,6 +615,7 @@ bool updateGame() {
 				}
 			}
 			else {
+				Audio::playSound(Audio::attcking);
 				if (gameData.player.direction == 1) {
 					rec = Rectangle{ gameData.player.transform.getTopLeft().x + toolX + exx , gameData.player.transform.getTopLeft().y + 0.10f + toolY, 0.3f + toolSize, 0.3f + toolSize };
 				}

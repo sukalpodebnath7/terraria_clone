@@ -1,6 +1,6 @@
 #include <helper.h>
 #include <block.h>
-
+#include <audio.h>
 int setBg(vector<int>& bg, GameMap& gameMap, int sX, int sY, int eX, int eY, int &val) {
 
 	for (int x = sX; x <= eX; x++) {
@@ -92,6 +92,7 @@ void buildTool(map<int, pair<Item, int>>& inventory, int tool, GameMap& gameMap)
 	Tool.type = tool;
 	
 	inventory[tool] = { Tool, 1 };
+	Audio::playSound(Audio::crafting);
 }
 
 void updateInventory(map<int, pair<Item, int>>& inventory) {
@@ -113,6 +114,7 @@ void toolFunction(int type, PlayerEntity& player, map<int, pair<Item, int>>& inv
 			if (player.health[0] == 20.f) return;
 			player.takenDamage -= 10.f;
 			inventory[type].second--;
+			Audio::playSound(Audio::eating);
 		}
 	}
 }

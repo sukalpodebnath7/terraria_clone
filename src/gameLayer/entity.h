@@ -77,8 +77,8 @@ struct Entity : public PhysicalEntity {
 				entityHealthUpdate();
 				entityTakenDamage = 0.f; 
 				velocity.y = -5.f;
-				player.downTouch = 0;
-				velocity.x = velocity.x + (direction == 1? 1 : -1)  * 10;
+				downTouch = 0;
+				velocity.x -= (direction == 1? 1 : -1)  * 30;
 
 			}
 			damageFrame = 0;

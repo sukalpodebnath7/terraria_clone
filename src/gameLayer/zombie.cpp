@@ -1,5 +1,5 @@
 #include <zombie.h>
-
+#include <audio.h>
 
 void Zombie::entityBehaviour(Transform2D& playerTransform) {
 	frameCount++;
