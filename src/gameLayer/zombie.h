@@ -14,7 +14,7 @@ struct Zombie : public Entity {
 
 	void entityBehaviour(Transform2D& playerTrasform) override;
 	void entityAction(Transform2D& player) override;
-	void zombieMoving(Vector2& target);
+	void zombieMoving(Vector2 target);
 
 	
 	float deltaTime;

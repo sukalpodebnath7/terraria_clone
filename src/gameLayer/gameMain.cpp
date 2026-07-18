@@ -21,38 +21,23 @@
 #include <recipeBook.h>
 #include <randomFuncs.h>
 #include <audio.h>
+#include <score.h>
+#include <ui.h>
+#include <ctime>
 using namespace std;
 
-
-struct GameData {
-	Camera2D camera;
-	GameMap gameMap = {};
-
-	int w = 5000;
-	int h = 600;
-
-	int selectedBlockType = Block::dirt;
-
-	Vector2 selectionStart = { 0,0 };
-	Vector2 selectionEnd = { 0,0 };
-
-	Structure copyStructure;
-
-	char saveName[100] = {};
-
-	PlayerEntity player;
-	vector<Item> dropedItems;
-	map<int, pair<Item, int>> inventory;
-	vector<int> bg;
-	Texture2D prevBg;
+std::ranlux24_base rng(69);
 
 
-}gameData;
+#include <gameData.h>
+
+GameData gameData;
 
 Zombie* zombie;
 vector<Zombie*> zombies;
 
 AssetManager assetManager;
+Score score;
 bool showimgui = false;
 int selectedItemId = 0;
 bool handEmpty = true;
@@ -75,8 +60,10 @@ bool initGame() {
 
 	assetManager.loadAll();
 
+	rng.seed(time(NULL));
+
 	gameData.gameMap.create(gameData.w, gameData.h);
-	generateWorld(gameData.gameMap, 2);
+	generateWorld(gameData.gameMap, getRandomInt(rng, 1, 1000000));
 
 	gameData.player.transform = { {100.5f,200.5f}, 0.8f, 1.8f };
 	gameData.player.playerTex = assetManager.player;
@@ -96,7 +83,32 @@ bool initGame() {
 	return true;
 }
 
-std::ranlux24_base rng(69);
+void resetGame() {
+	for (auto& z : zombies) {
+		if (z != nullptr) delete z;
+	}
+	zombies.clear();
+
+	gameData.dropedItems.clear();
+	gameData.inventory.clear();
+
+	score.reset();
+
+	gameData.gameMap.create(gameData.w, gameData.h);
+	generateWorld(gameData.gameMap, getRandomInt(rng, 1, 1000000));
+
+	gameData.player.transform.pos = {100.5f, 200.5f};
+	gameData.player.velocity = {0, 0};
+	for (int i = 0; i < 5; i++) {
+		gameData.player.health[i] = 20.f;
+	}
+	gameData.player.takenDamage = 0.f;
+	gameData.player.selectedBlock = 1;
+	gameData.player.lastDownTouch = gameData.player.transform.pos.y;
+	gameData.player.state = PlayerEntity::standing;
+	
+	handEmpty = true;
+}
 
 void spawnZombie(vector<Zombie*>& zombies, PlayerEntity& player, GameMap& gameMap, Texture2D tex) {
 	if (zombies.size() == 10) return;
@@ -157,6 +169,24 @@ bool updateGame() {
 
 	Audio::update();
 
+	if (currentGameState == GameState::MainMenu) {
+		DrawMainMenu();
+		return true;
+	}
+
+	if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ESCAPE)) {
+		if (currentGameState == GameState::Playing) {
+			currentGameState = GameState::Paused;
+		} else if (currentGameState == GameState::Paused) {
+			currentGameState = GameState::Playing;
+		}
+	}
+
+	if (currentGameState == GameState::Paused) {
+		DrawPauseMenu();
+		return true;
+	}
+
 	//-------------------------zombie spawning ---------------------------
 	spawnZombie(zombies, gameData.player, gameData.gameMap, assetManager.zombie);
 	despawnZombie(zombies, gameData.player);
@@ -201,6 +231,7 @@ bool updateGame() {
 
 			if (zombie->entityHealth <= 0.f) {
 				Audio::playSound(Audio::entityDeath);
+				score.onEnemyKill();
 				delete zombie;
 				zombie = nullptr;
 				zombies.erase(zombies.begin() + i);
@@ -875,6 +906,9 @@ bool updateGame() {
 			WHITE
 		);
 	}
+	
+	int scoreTextWidth = MeasureText(TextFormat("Score: %d", score.totalScore), 20);
+	DrawText(TextFormat("Score: %d", score.totalScore), startHeart + (5 * heartWidth) / 2.0f - scoreTextWidth / 2.0f, 10.f + heartHeight + 10.f, 20, WHITE);
 	
 
 

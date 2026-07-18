@@ -1,4 +1,3 @@
-#pragma once
 #include <assetManager.h>
 
 void AssetManager::loadAll() {
@@ -17,5 +16,6 @@ void AssetManager::loadAll() {
 	tools = LoadTexture(RESOURCES_PATH "items.png");
 	mummy = LoadTexture(RESOURCES_PATH "mumy.png");
 	iceZombie = LoadTexture(RESOURCES_PATH "zombie_eskimo.png");
+	uiBg = LoadTexture(RESOURCES_PATH "UI_bg.png");
 }
 

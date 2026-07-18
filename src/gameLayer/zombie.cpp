@@ -55,7 +55,7 @@ void Zombie::entityAction(Transform2D& player) {
 }
 
 
-void Zombie::zombieMoving(Vector2& target) {
+void Zombie::zombieMoving(Vector2 target) {
 
 	float delta = target.x - transform.pos.x;
 	direction = delta < 0 ? -1 : 1;
