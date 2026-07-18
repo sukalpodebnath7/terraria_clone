@@ -1,5 +1,5 @@
+
 #include <worldGenerator.h>
-#include <memory>
 #include <FastNoiseSIMD.h>
 #include <cmath>
 #include <raymath.h>
@@ -84,12 +84,6 @@ void generateWorld(GameMap& gameMap, int seed) {
 		top.type = Regular.topBlock.type;
 
 		float prob = getRandomFloat(rng, 0.f, 1.f);
-		
-		// Force the spawn area (around X=100) to always be a Regular/Forest biome
-		if (!(length < 50 || i > 150)) {
-			prob = 0.0f;
-		}
-
 		if (prob <= 0.5) {
 			dirt.type = Regular.dirtBlock.type;
 			stone.type = Regular.stoneBlock.type;

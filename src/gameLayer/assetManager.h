@@ -19,7 +19,6 @@ struct AssetManager {
 	Texture2D tools;
 	Texture2D mummy;
 	Texture2D iceZombie;
-	Texture2D uiBg;
     //music
     Music forestBG;
     Music snowBG;
